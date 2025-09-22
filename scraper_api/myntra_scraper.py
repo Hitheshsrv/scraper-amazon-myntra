@@ -73,12 +73,19 @@ def scrape_myntra_products(search_query):
                 review_count = product.get('ratingCount')
                 reviews = str(review_count) if review_count else "N/A"
 
+                # Get the product URL
+                product_url = ''
+                product_link = product.get('landingPageUrl', '')
+                if product_link:
+                    product_url = f"https://www.myntra.com/{product_link}"
+
                 scraped_products.append({
                     'name': full_name,
                     'price': str(price),
                     'image_url': image_url,
                     'rating': rating,
-                    'reviews': reviews
+                    'reviews': reviews,
+                    'url': product_url
                 })
             except (KeyError, IndexError, TypeError) as e:
                 # This handles cases where a specific product in the JSON has missing fields

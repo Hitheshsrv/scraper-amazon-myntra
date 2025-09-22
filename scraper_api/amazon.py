@@ -39,12 +39,24 @@ def scrape_amazon_products(search_query):
                 # Remove currency symbols and commas, then strip whitespace
                 price_text = price_element.get_text(strip=True).replace('\u20b9', '').replace('₹', '').replace(',', '')
 
+            # Get product URL
+            product_url = 'N/A'
+            title_element = item.select_one('h2.a-size-medium.a-color-base.a-text-normal')
+            if title_element and title_element.parent:
+                if title_element.parent.name == 'a':
+                    product_url = 'https://www.amazon.in' + title_element.parent.get('href', '')
+                else:
+                    url_element = item.select_one('a.a-link-normal.s-no-outline')
+                    if url_element:
+                        product_url = 'https://www.amazon.in' + url_element.get('href', '')
+
             product_data = {
-                'name': item.select_one('h2.a-size-medium.a-color-base.a-text-normal').get_text(strip=True) if item.select_one('h2.a-size-medium.a-color-base.a-text-normal') else 'N/A',
+                'name': title_element.get_text(strip=True) if title_element else 'N/A',
                 'price': price_text,
                 'rating': item.select_one('span.a-icon-alt').get_text(strip=True) if item.select_one('span.a-icon-alt') else 'N/A',
                 'reviews': item.select_one('span.a-size-base.s-underline-text').get_text(strip=True).replace(',', '') if item.select_one('span.a-size-base.s-underline-text') else 'N/A',
-                'image_url': item.select_one('img.s-image')['src'] if item.select_one('img.s-image') else 'N/A'
+                'image_url': item.select_one('img.s-image')['src'] if item.select_one('img.s-image') else 'N/A',
+                'url': product_url
             }
 
             if product_data['name'] != 'N/A' and product_data['price'] != 'N/A':
